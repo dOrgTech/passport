@@ -117,17 +117,20 @@ contract ERC721OnlyOwnerTransferable is IERC721, IERC721Metadata, Ownable {
     /**
      * @dev See {IERC721-approve}.
      */
-    function approve(address to, uint256 tokenId) public override {
+    function approve(
+        address, /* to */
+        uint256 /* tokenId */
+    ) public pure override {
         revert Disabled();
     }
 
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
-    function setApprovalForAll(address operator, bool approved)
-        public
-        override
-    {
+    function setApprovalForAll(
+        address, /* operator */
+        bool /* approved */
+    ) public pure override {
         revert Disabled();
     }
 
@@ -137,7 +140,6 @@ contract ERC721OnlyOwnerTransferable is IERC721, IERC721Metadata, Ownable {
     function getApproved(uint256 tokenId)
         public
         view
-        virtual
         override
         returns (address)
     {
@@ -149,13 +151,10 @@ contract ERC721OnlyOwnerTransferable is IERC721, IERC721Metadata, Ownable {
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function isApprovedForAll(address owner, address operator)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function isApprovedForAll(
+        address, /* owner */
+        address /* operator */
+    ) public pure override returns (bool) {
         return false;
     }
 

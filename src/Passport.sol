@@ -12,7 +12,10 @@ contract Passport is ERC721OnlyOwnerTransferable {
     constructor() ERC721OnlyOwnerTransferable("Passport", "PASS", "") {}
 
     // OnlyOwner functions
-    function safeMint(address to, string memory uri) public {
+    function safeMint(
+        address to,
+        string memory /* uri */
+    ) public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
