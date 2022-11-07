@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {IERC721, IERC165} from "../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
-import {IERC721Receiver} from "../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
-import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import {Counters} from "../lib/openzeppelin-contracts/contracts/utils/Counters.sol";
-import {IERC721Metadata} from "../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {Address} from "../lib/openzeppelin-contracts/contracts/utils/Address.sol";
-import {Strings} from "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import {IERC721, IERC165} from "../../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "../../lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import {Ownable} from "../../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Counters} from "../../lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import {IERC721Metadata} from "../../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {Address} from "../../lib/openzeppelin-contracts/contracts/utils/Address.sol";
+import {Strings} from "../../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 contract ERC721OnlyOwnerTransferable is IERC721, IERC721Metadata, Ownable {
     using Address for address;

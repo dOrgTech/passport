@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {ERC721OnlyOwnerTransferable} from "./ERC721OnlyOwnerTransferable.sol";
-import {Counters} from "../lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import {ERC721OnlyOwnerTransferable} from "../ERC721OnlyOwnerTransferable/ERC721OnlyOwnerTransferable.sol";
+import {Counters} from "../../lib/openzeppelin-contracts/contracts/utils/Counters.sol";
 
 contract Passport is ERC721OnlyOwnerTransferable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721OnlyOwnerTransferable("Passport", "PASS", "") {}
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_
+    ) ERC721OnlyOwnerTransferable(name_, symbol_, baseURI_) {}
 
     // OnlyOwner functions
     function safeMint(
