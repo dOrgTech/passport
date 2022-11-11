@@ -28,7 +28,7 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
         baseURI = baseURI_;
     }
 
-    function _baseURI() internal pure override returns (string memory) {
+    function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
@@ -76,7 +76,7 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
     function isApprovedForAll(
         address, /* owner */
         address operator /* operator */
-    ) public pure override returns (bool) {
+    ) public view override returns (bool) {
         return hasRole(TRANSFERER_ROLE, operator);
     }
 
@@ -88,6 +88,24 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
     {
         _requireMinted(tokenId);
         return isApprovedForAll(address(0), spender);
+    }
+
+    // To make sensible error messages
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyRole(TRANSFERER_ROLE) {
+        _transfer(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public override onlyRole(TRANSFERER_ROLE) {
+        _safeTransfer(from, to, tokenId, data);
     }
 
     // The following functions are overrides required by Solidity.
