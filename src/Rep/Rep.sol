@@ -7,6 +7,7 @@ import {ERC20Snapshot} from "../../lib/openzeppelin-contracts/contracts/token/ER
 import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import {ERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20Votes} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import {Passport} from "../Passport/Passport.sol";
 
 contract Rep is
     ERC20,
@@ -22,14 +23,14 @@ contract Rep is
     bytes32 public constant MINTER_BURNER_ROLE =
         keccak256("MINTER_BURNER_ROLE");
 
-    address public immutable passport;
+    Passport public immutable passport;
 
     constructor(
         address passport_,
         string memory name_,
         string memory symbol_
     ) ERC20(name_, symbol_) ERC20Permit(name_) {
-        passport = passport_;
+        passport = Passport(passport_);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SNAPSHOT_ROLE, msg.sender);
         _grantRole(MINTER_BURNER_ROLE, msg.sender);
@@ -39,11 +40,15 @@ contract Rep is
         _snapshot();
     }
 
-    function mint(address to, uint256 amount)
+    function mint(uint256 toPassportId, uint256 amount)
         public
         onlyRole(MINTER_BURNER_ROLE)
     {
-        _mint(to, amount);
+        _mint(passport.ownerOf(toPassportId), amount);
+    }
+
+    function balanceOf(uint256 passportId) public view returns (uint256) {
+        return balanceOf(passport.ownerOf(passportId));
     }
 
     function transfer(
@@ -89,12 +94,15 @@ contract Rep is
         revert Disabled();
     }
 
-    function burnFrom(address account, uint256 amount)
+    function burnFrom(address account, uint256 amount) public override {
+        revert Disabled();
+    }
+
+    function burnFrom(uint256 passportId, uint256 amount)
         public
-        override
         onlyRole(MINTER_BURNER_ROLE)
     {
-        _burn(account, amount);
+        _burn(passport.ownerOf(passportId), amount);
     }
 
     function burn(
