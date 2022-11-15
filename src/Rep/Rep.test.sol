@@ -4,8 +4,10 @@ pragma solidity ^0.8.13;
 import "../../lib/forge-std/src/Test.sol";
 import {Strings} from "../../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 import {Rep} from "./Rep.sol";
+import {Passport} from "../Passport/Passport.sol";
 
 contract RepTest is Test {
+    Passport public passport;
     Rep public rep;
     address public admin = address(0x1);
     address public minter_burner = address(0x2);
@@ -15,7 +17,8 @@ contract RepTest is Test {
     address public bob = address(0x5);
 
     function setUp() public {
-        rep = new Rep("Reputation", "REP");
+        passport = new Passport("Passport", "PASS", "");
+        rep = new Rep(address(passport), "Reputation", "REP");
         rep.grantRole(rep.DEFAULT_ADMIN_ROLE(), admin);
         rep.grantRole(rep.MINTER_BURNER_ROLE(), minter_burner);
         rep.grantRole(rep.SNAPSHOT_ROLE(), snapshoter);

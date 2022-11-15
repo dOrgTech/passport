@@ -22,10 +22,14 @@ contract Rep is
     bytes32 public constant MINTER_BURNER_ROLE =
         keccak256("MINTER_BURNER_ROLE");
 
-    constructor(string memory name_, string memory symbol_)
-        ERC20(name_, symbol_)
-        ERC20Permit(name_)
-    {
+    address public immutable passport;
+
+    constructor(
+        address passport_,
+        string memory name_,
+        string memory symbol_
+    ) ERC20(name_, symbol_) ERC20Permit(name_) {
+        passport = passport_;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SNAPSHOT_ROLE, msg.sender);
         _grantRole(MINTER_BURNER_ROLE, msg.sender);
