@@ -42,89 +42,61 @@ contract Rep is
         _mint(to, amount);
     }
 
-    function transfer(address to, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
-        emit Disabled();
+    function transfer(
+        address, /* to */
+        uint256 /* amount */
+    ) public pure override returns (bool) {
+        revert Disabled();
     }
 
     function transferFrom(
-        address from,
-        address to,
-        uint256 amount
+        address, /* from */
+        address, /* to */
+        uint256 /* amount */
     ) public virtual override returns (bool) {
-        emit Disabled();
+        revert Disabled();
     }
 
-    function increaseAllowance(address spender, uint256 addedValue)
-        public
-        virtual
-        returns (bool)
-    {
-        emit Disabled();
+    function increaseAllowance(
+        address, /* spender */
+        uint256 /* addedValue */
+    ) public pure override returns (bool) {
+        revert Disabled();
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        public
-        virtual
-        returns (bool)
-    {
-        emit Disabled();
+    function decreaseAllowance(
+        address, /* spender */
+        uint256 /* subtractedValue */
+    ) public pure override returns (bool) {
+        revert Disabled();
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {
-        emit Disabled();
-    }
-
-    function allowance(address owner, address spender)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function allowance(
+        address, /* owner */
+        address /* spender */
+    ) public pure override returns (uint256) {
         return 0;
     }
 
-    function approve(address spender, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
-        emit Disabled();
-    }
-
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
-        emit Disabled();
-    }
-
-    function _spendAllowance(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
-        emit Disabled();
+    function approve(
+        address, /* spender */
+        uint256 /* amount */
+    ) public pure override returns (bool) {
+        revert Disabled();
     }
 
     function burnFrom(address account, uint256 amount)
         public
-        virtual
+        override
         onlyRole(MINTER_BURNER_ROLE)
     {
         _burn(account, amount);
     }
 
-    function burn(uint256 amount) public virtual onlyRole(MINTER_BURNER_ROLE) {
-        _burn(_msgSender(), amount);
+    function burn(
+        uint256 /* amount */
+    ) public pure override {
+        revert Disabled();
     }
 
     // The following functions are overrides required by Solidity.
