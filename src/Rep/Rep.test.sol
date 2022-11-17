@@ -18,7 +18,7 @@ contract RepTest is Test {
     address public alice = address(0x4);
     address public bob = address(0x5);
 
-    uint256 alicePassportID = 0;
+    uint256 alicePassportId = 0;
     uint256 bobPassportID = 1;
 
     function setUp() public {
@@ -46,24 +46,63 @@ contract RepTest is Test {
         assertEq(rep.symbol(), "REP");
     }
 
+    function testUpdateOwner() public {
+        // mint a rep to alice
+        vm.prank(minter_burner);
+        rep.mint(alicePassportId, 100);
+
+        address newAlice = address(0x7);
+        assertEq(rep.balanceOf(alice), 100);
+        assertEq(rep.balanceOf(newAlice), 0);
+        assertEq(rep.balanceOf(alicePassportId), 100);
+
+        vm.prank(passport_transferer);
+        passport.safeTransferFrom(alice, newAlice, alicePassportId);
+
+        assertEq(rep.balanceOf(alice), 100);
+        assertEq(rep.balanceOf(newAlice), 0);
+        assertEq(rep.balanceOf(alicePassportId), 0);
+
+        rep.updateOwner(alicePassportId);
+
+        assertEq(rep.balanceOf(alice), 0);
+        assertEq(rep.balanceOf(newAlice), 100);
+        assertEq(rep.balanceOf(alicePassportId), 100);
+
+        // test implicit updateOwner
+        vm.prank(passport_transferer);
+        passport.safeTransferFrom(newAlice, alice, alicePassportId);
+
+        assertEq(rep.balanceOf(newAlice), 100);
+        assertEq(rep.balanceOf(alice), 0);
+        assertEq(rep.balanceOf(alicePassportId), 0);
+
+        vm.prank(minter_burner);
+        rep.mint(alicePassportId, 100);
+
+        assertEq(rep.balanceOf(newAlice), 0);
+        assertEq(rep.balanceOf(alice), 200);
+        assertEq(rep.balanceOf(alicePassportId), 200);
+    }
+
     function testOnlyMinterBurnerCanMint() public {
         // cant mint with msg.sender
         vm.expectRevert(
             missingRoleError(rep.MINTER_BURNER_ROLE(), address(this))
         );
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
         assertEq(rep.balanceOf(alice), 0);
 
         // can mint with minter
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
         assertEq(rep.balanceOf(alice), 100);
     }
 
     function testNobodyCanTransferer() public {
-        // mint a rep to the msg.sender
+        // mint a rep to alice
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
 
         // the owner (msg.sender) can't transfer
         vm.expectRevert(Rep.Disabled.selector);
@@ -92,28 +131,25 @@ contract RepTest is Test {
     function testOnlyMinterBurnerCanBurn() public {
         // mint a rep to the msg.sender
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 200);
+        rep.mint(alicePassportId, 200);
 
         // the owner (msg.sender) can't burn
-        vm.expectRevert(Rep.Disabled.selector);
-        rep.burn(100);
+        vm.expectRevert(
+            missingRoleError(rep.MINTER_BURNER_ROLE(), address(this))
+        );
+        rep.burnFrom(alicePassportId, 100);
         assertEq(rep.balanceOf(alice), 200);
 
         // the minter_burner can burn
         vm.prank(minter_burner);
-        rep.burnFrom(alicePassportID, 50);
+        rep.burnFrom(alicePassportId, 50);
         assertEq(rep.balanceOf(alice), 150);
-
-        // the burn method is disabled
-        vm.prank(minter_burner);
-        vm.expectRevert(Rep.Disabled.selector);
-        rep.burn(50);
     }
 
     function testSetApprove() public {
         // mint a rep to the msg.sender
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
 
         // can not approve
         vm.expectRevert(Rep.Disabled.selector);
@@ -124,30 +160,29 @@ contract RepTest is Test {
     function testGetAllowance() public {
         // mint a rep to the msg.sender
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
 
         // should get false for all addresses, except for the transferer
         assertEq(rep.allowance(msg.sender, alice), 0);
         assertEq(rep.allowance(msg.sender, address(this)), 0);
     }
 
-    // TODO: handle the move of a passport:
     // we must detect when a passport has moved and update the rep accordingly when a function is called
     function testBurnWhenPassportMove() public {
         // mint a rep to the msg.sender
         vm.prank(minter_burner);
-        rep.mint(alicePassportID, 100);
+        rep.mint(alicePassportId, 100);
 
         address aliceNewAddress = address(0x44);
 
         vm.prank(passport_transferer);
-        passport.safeTransferFrom(alice, aliceNewAddress, alicePassportID);
-        assertEq(passport.ownerOf(alicePassportID), aliceNewAddress);
+        passport.safeTransferFrom(alice, aliceNewAddress, alicePassportId);
+        assertEq(passport.ownerOf(alicePassportId), aliceNewAddress);
 
-        // should still be able to burn Alice's rep
+        // should still be able to burn Alice's rep (even though the passport has moved)
         vm.prank(minter_burner);
-        rep.burnFrom(alicePassportID, 70);
-        assertEq(rep.balanceOf(alicePassportID), 30);
+        rep.burnFrom(alicePassportId, 70);
+        assertEq(rep.balanceOf(alicePassportId), 30);
     }
 }
 

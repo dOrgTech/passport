@@ -2,21 +2,13 @@
 pragma solidity ^0.8.13;
 
 import {ERC20} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import {ERC20Burnable} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Snapshot} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import {ERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20Votes} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {Passport} from "../Passport/Passport.sol";
 
-contract Rep is
-    ERC20,
-    ERC20Burnable,
-    ERC20Snapshot,
-    AccessControl,
-    ERC20Permit,
-    ERC20Votes
-{
+contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
     error Disabled();
 
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
@@ -24,6 +16,12 @@ contract Rep is
         keccak256("MINTER_BURNER_ROLE");
 
     Passport public immutable passport;
+    mapping(uint256 => address) private passportToAddress;
+
+    modifier updateAddress(uint256 passportId) {
+        updateOwner(passportId);
+        _;
+    }
 
     constructor(
         address passport_,
@@ -36,6 +34,23 @@ contract Rep is
         _grantRole(MINTER_BURNER_ROLE, msg.sender);
     }
 
+    function updateOwner(uint256 passportId) public {
+        if (passportToAddress[passportId] == address(0)) {
+            // its the first time we see this passport
+            passportToAddress[passportId] = passport.ownerOf(passportId);
+            return;
+        }
+        if (passportToAddress[passportId] != passport.ownerOf(passportId)) {
+            // the passport has moved
+            _transfer(
+                passportToAddress[passportId],
+                passport.ownerOf(passportId),
+                balanceOf(passportToAddress[passportId])
+            );
+            passportToAddress[passportId] = passport.ownerOf(passportId);
+        }
+    }
+
     function snapshot() public onlyRole(SNAPSHOT_ROLE) {
         _snapshot();
     }
@@ -43,6 +58,7 @@ contract Rep is
     function mint(uint256 toPassportId, uint256 amount)
         public
         onlyRole(MINTER_BURNER_ROLE)
+        updateAddress(toPassportId)
     {
         _mint(passport.ownerOf(toPassportId), amount);
     }
@@ -94,21 +110,12 @@ contract Rep is
         revert Disabled();
     }
 
-    function burnFrom(address account, uint256 amount) public override {
-        revert Disabled();
-    }
-
     function burnFrom(uint256 passportId, uint256 amount)
         public
         onlyRole(MINTER_BURNER_ROLE)
+        updateAddress(passportId)
     {
         _burn(passport.ownerOf(passportId), amount);
-    }
-
-    function burn(
-        uint256 /* amount */
-    ) public pure override {
-        revert Disabled();
     }
 
     // The following functions are overrides required by Solidity.
