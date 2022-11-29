@@ -45,43 +45,43 @@ contract PassportTest is Test {
     }
 
     function testOnlyTransfererCanTransfer() public {
-        // mint a Passport to the msg.sender
+        // mint a Passport to alice
         vm.prank(minter);
-        passport.safeMint(msg.sender);
+        passport.safeMint(alice);
 
-        // the owner (msg.sender) can't transfer
+        // the owner (alice) can't transfer
         vm.expectRevert(
             missingRoleError(passport.TRANSFERER_ROLE(), address(this))
         );
-        passport.transferFrom(msg.sender, alice, 0);
-        assertEq(passport.balanceOf(msg.sender), 1);
-        assertEq(passport.balanceOf(alice), 0);
+        vm.prank(alice);
+        passport.transferFrom(alice, bob, 0);
+        assertEq(passport.balanceOf(alice), 1);
+        assertEq(passport.balanceOf(bob), 0);
 
         // the transferer can transfer
         vm.prank(transferer);
-        passport.transferFrom(msg.sender, alice, 0);
-        assertEq(passport.balanceOf(msg.sender), 0);
-        assertEq(passport.balanceOf(alice), 1);
+        passport.transferFrom(alice, bob, 0);
+        assertEq(passport.balanceOf(alice), 0);
+        assertEq(passport.balanceOf(bob), 1);
     }
 
     function testOnlyTransfererCanSafeTransfer() public {
         // mint a Passport to the msg.sender
         vm.prank(minter);
-        passport.safeMint(msg.sender);
+        passport.safeMint(alice);
 
         // the owner (msg.sender) can't transfer
-        vm.expectRevert(
-            missingRoleError(passport.TRANSFERER_ROLE(), address(this))
-        );
-        passport.safeTransferFrom(msg.sender, alice, 0);
-        assertEq(passport.balanceOf(msg.sender), 1);
-        assertEq(passport.balanceOf(alice), 0);
+        vm.expectRevert(missingRoleError(passport.TRANSFERER_ROLE(), alice));
+        vm.prank(alice);
+        passport.safeTransferFrom(alice, bob, 0);
+        assertEq(passport.balanceOf(alice), 1);
+        assertEq(passport.balanceOf(bob), 0);
 
         // the transferer can transfer
         vm.prank(transferer);
-        passport.safeTransferFrom(msg.sender, alice, 0);
-        assertEq(passport.balanceOf(msg.sender), 0);
-        assertEq(passport.balanceOf(alice), 1);
+        passport.safeTransferFrom(alice, bob, 0);
+        assertEq(passport.balanceOf(alice), 0);
+        assertEq(passport.balanceOf(bob), 1);
     }
 
     function testOnlyAdminCanUpdateBaseURI() public {
@@ -103,13 +103,26 @@ contract PassportTest is Test {
     }
 
     function testSetApprove() public {
-        // mint a Passport to the msg.sender
+        // mint a Passport to alice
         vm.prank(minter);
-        passport.safeMint(msg.sender);
+        passport.safeMint(alice);
 
         // can not approve
         vm.expectRevert(Passport.Disabled.selector);
-        passport.approve(alice, 0);
+        vm.prank(alice);
+        passport.approve(bob, 0);
+        assertEq(passport.getApproved(0), address(0));
+    }
+
+    function testSetApprovalForAll() public {
+        // mint a Passport to alice
+        vm.prank(minter);
+        passport.safeMint(alice);
+
+        // can not approve
+        vm.expectRevert(Passport.Disabled.selector);
+        vm.prank(alice);
+        passport.setApprovalForAll(bob, true);
         assertEq(passport.getApproved(0), address(0));
     }
 
