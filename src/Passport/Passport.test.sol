@@ -32,9 +32,7 @@ contract PassportTest is Test {
 
     function testOnlyMinterCanSafeMint() public {
         // cant mint with msg.sender
-        vm.expectRevert(
-            missingRoleError(passport.MINTER_ROLE(), address(this))
-        );
+        vm.expectRevert(missingRoleError(passport.MINTER_ROLE(), address(this)));
         passport.safeMint(msg.sender);
         assertEq(passport.balanceOf(msg.sender), 0);
 
@@ -50,9 +48,7 @@ contract PassportTest is Test {
         passport.safeMint(alice);
 
         // the owner (alice) can't transfer
-        vm.expectRevert(
-            missingRoleError(passport.TRANSFERER_ROLE(), address(this))
-        );
+        vm.expectRevert(missingRoleError(passport.TRANSFERER_ROLE(), alice));
         vm.prank(alice);
         passport.transferFrom(alice, bob, 0);
         assertEq(passport.balanceOf(alice), 1);
@@ -90,9 +86,7 @@ contract PassportTest is Test {
         passport.safeMint(msg.sender);
 
         // cant update baseURI with msg.sender
-        vm.expectRevert(
-            missingRoleError(passport.DEFAULT_ADMIN_ROLE(), address(this))
-        );
+        vm.expectRevert(missingRoleError(passport.DEFAULT_ADMIN_ROLE(), address(this)));
         passport.updateBaseURI("https://example.com/");
         assertEq(passport.tokenURI(0), "");
 
@@ -147,19 +141,15 @@ contract PassportTest is Test {
     }
 }
 
-function missingRoleError(bytes32 role, address account)
-    pure
-    returns (bytes memory)
-{
-    return
-        bytes(
-            string(
-                abi.encodePacked(
-                    "AccessControl: account ",
-                    Strings.toHexString(account),
-                    " is missing role ",
-                    Strings.toHexString(uint256(role), 32)
-                )
+function missingRoleError(bytes32 role, address account) pure returns (bytes memory) {
+    return bytes(
+        string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                Strings.toHexString(account),
+                " is missing role ",
+                Strings.toHexString(uint256(role), 32)
             )
-        );
+        )
+    );
 }
