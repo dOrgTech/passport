@@ -6,7 +6,7 @@ import {Strings} from "../../lib/openzeppelin-contracts/contracts/utils/Strings.
 import {Badges} from "./Badges.sol";
 import {Passport} from "../Passport/Passport.sol";
 
-contract BadgeTest is Test {
+contract BadgesTest is Test {
     Badges public badges;
     address public owner = address(0x1);
 
