@@ -42,11 +42,11 @@ contract Badges is ERC1155, Ownable {
         }
     }
 
-    function setURI(string memory newUri) public onlyOwner {
+    function setURI(string memory newUri) external onlyOwner {
         _setURI(newUri);
     }
 
-    function mint(uint256 passportId, uint256 tokenId, uint256 amount, bytes memory data) public onlyOwner {
+    function mint(uint256 passportId, uint256 tokenId, uint256 amount, bytes memory data) external onlyOwner {
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = tokenId;
         updateOwner(passportId, tokenIds);
@@ -54,14 +54,14 @@ contract Badges is ERC1155, Ownable {
     }
 
     function mintBatch(uint256 passportId, uint256[] memory tokenIds, uint256[] memory amounts, bytes memory data)
-        public
+        external
         onlyOwner
         updateAddress(passportId, tokenIds)
     {
         _mintBatch(passport.ownerOf(passportId), tokenIds, amounts, data);
     }
 
-    function burn(uint256 passportId, uint256 tokenId, uint256 amount) public onlyOwner {
+    function burn(uint256 passportId, uint256 tokenId, uint256 amount) external onlyOwner {
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = tokenId;
         updateOwner(passportId, tokenIds);
@@ -69,26 +69,26 @@ contract Badges is ERC1155, Ownable {
     }
 
     function burnBatch(uint256 passportId, uint256[] memory tokenIds, uint256[] memory values)
-        public
+        external
         onlyOwner
         updateAddress(passportId, tokenIds)
     {
         _burnBatch(passport.ownerOf(passportId), tokenIds, values);
     }
 
-    function balanceOf(uint256 passportId, uint256 tokenId) public view returns (uint256) {
+    function balanceOf(uint256 passportId, uint256 tokenId) external view returns (uint256) {
         return super.balanceOf(passport.ownerOf(passportId), tokenId);
     }
 
     function balanceOfBatch(uint256[] memory passportIds, uint256[] memory ids)
-        public
+        external
         view
         returns (uint256[] memory)
     {
         address[] memory accounts = new address[](passportIds.length);
 
         for (uint256 i = 0; i < passportIds.length; ++i) {
-            accounts[i] = passport.ownerOf(passportIds[i]);
+            accounts[i] = passport.ownerOf(passportIds[i]); // this is safe, the passport can be trusted. Also if it should fail, it will be possible to call again with less number of passports
         }
         return balanceOfBatch(accounts, ids);
     }

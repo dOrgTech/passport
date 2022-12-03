@@ -17,11 +17,10 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
     Counters.Counter private _tokenIdCounter;
     string private baseURI;
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        string memory baseURI_
-    ) ERC721(name_, symbol_) EIP712(name_, "1") {
+    constructor(string memory name_, string memory symbol_, string memory baseURI_)
+        ERC721(name_, symbol_)
+        EIP712(name_, "1")
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(TRANSFERER_ROLE, msg.sender);
@@ -32,40 +31,26 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
         return baseURI;
     }
 
-    function updateBaseURI(string memory newBaseURI)
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function updateBaseURI(string memory newBaseURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = newBaseURI;
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to) external onlyRole(MINTER_ROLE) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
 
     // Configure the approval functionality to return expected values
-    function approve(
-        address, /* to */
-        uint256 /* tokenId */
-    ) public pure override {
+    function approve(address, /* to */ uint256 /* tokenId */ ) public pure override {
         revert Disabled();
     }
 
-    function setApprovalForAll(
-        address, /* operator */
-        bool /* approved */
-    ) public pure override {
+    function setApprovalForAll(address, /* operator */ bool /* approved */ ) public pure override {
         revert Disabled();
     }
 
-    function getApproved(uint256 tokenId)
-        public
-        view
-        override
-        returns (address)
-    {
+    function getApproved(uint256 tokenId) public view override returns (address) {
         _requireMinted(tokenId);
 
         return address(0);
@@ -73,58 +58,43 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
 
     // Make sure the token is only transferable by the TRANSFERRER_ROLE
 
-    function isApprovedForAll(
-        address, /* owner */
-        address operator /* operator */
-    ) public view override returns (bool) {
-        return hasRole(TRANSFERER_ROLE, operator);
-    }
-
-    function _isApprovedOrOwner(address spender, uint256 tokenId)
-        internal
+    function isApprovedForAll(address, /* owner */ address operator /* operator */ )
+        public
         view
         override
         returns (bool)
     {
+        return hasRole(TRANSFERER_ROLE, operator);
+    }
+
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view override returns (bool) {
         _requireMinted(tokenId);
         return isApprovedForAll(address(0), spender);
     }
 
     // To make sensible error messages
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public override onlyRole(TRANSFERER_ROLE) {
+    function transferFrom(address from, address to, uint256 tokenId) public override onlyRole(TRANSFERER_ROLE) {
         _transfer(from, to, tokenId);
     }
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) public override onlyRole(TRANSFERER_ROLE) {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+        public
+        override
+        onlyRole(TRANSFERER_ROLE)
+    {
         _safeTransfer(from, to, tokenId, data);
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override(ERC721, ERC721Votes) {
+    function _afterTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+        internal
+        override (ERC721, ERC721Votes)
+    {
         super._afterTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, AccessControl)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override (ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
