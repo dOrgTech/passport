@@ -12,8 +12,7 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
     error Disabled();
 
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
-    bytes32 public constant MINTER_BURNER_ROLE =
-        keccak256("MINTER_BURNER_ROLE");
+    bytes32 public constant MINTER_BURNER_ROLE = keccak256("MINTER_BURNER_ROLE");
 
     Passport public immutable passport;
     mapping(uint256 => address) private passportToAddress;
@@ -23,11 +22,10 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
         _;
     }
 
-    constructor(
-        address passport_,
-        string memory name_,
-        string memory symbol_
-    ) ERC20(name_, symbol_) ERC20Permit(name_) {
+    constructor(address passport_, string memory name_, string memory symbol_)
+        ERC20(name_, symbol_)
+        ERC20Permit(name_)
+    {
         passport = Passport(passport_);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SNAPSHOT_ROLE, msg.sender);
@@ -35,19 +33,15 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
     }
 
     function updateOwner(uint256 passportId) public {
-        if (passportToAddress[passportId] == address(0)) {
+        address passportOwner = passport.ownerOf(passportId); // reverts if does not exist
+        address currentOwner = passportToAddress[passportId];
+        if (currentOwner == address(0)) {
             // its the first time we see this passport
-            passportToAddress[passportId] = passport.ownerOf(passportId);
-            return;
-        }
-        if (passportToAddress[passportId] != passport.ownerOf(passportId)) {
+            passportToAddress[passportId] = passportOwner;
+        } else if (currentOwner != passportOwner) {
             // the passport has moved
-            _transfer(
-                passportToAddress[passportId],
-                passport.ownerOf(passportId),
-                balanceOf(passportToAddress[passportId])
-            );
-            passportToAddress[passportId] = passport.ownerOf(passportId);
+            _transfer(currentOwner, passportOwner, balanceOf(currentOwner));
+            passportToAddress[passportId] = passportOwner;
         }
     }
 
@@ -67,46 +61,37 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
         return balanceOf(passport.ownerOf(passportId));
     }
 
-    function transfer(
-        address, /* to */
-        uint256 /* amount */
-    ) public pure override returns (bool) {
+    function transfer(address, /* to */ uint256 /* amount */ ) public pure override returns (bool) {
         revert Disabled();
     }
 
-    function transferFrom(
-        address, /* from */
-        address, /* to */
-        uint256 /* amount */
-    ) public virtual override returns (bool) {
+    function transferFrom(address, /* from */ address, /* to */ uint256 /* amount */ )
+        public
+        virtual
+        override
+        returns (bool)
+    {
         revert Disabled();
     }
 
-    function increaseAllowance(
-        address, /* spender */
-        uint256 /* addedValue */
-    ) public pure override returns (bool) {
+    function increaseAllowance(address, /* spender */ uint256 /* addedValue */ ) public pure override returns (bool) {
         revert Disabled();
     }
 
-    function decreaseAllowance(
-        address, /* spender */
-        uint256 /* subtractedValue */
-    ) public pure override returns (bool) {
+    function decreaseAllowance(address, /* spender */ uint256 /* subtractedValue */ )
+        public
+        pure
+        override
+        returns (bool)
+    {
         revert Disabled();
     }
 
-    function allowance(
-        address, /* owner */
-        address /* spender */
-    ) public pure override returns (uint256) {
+    function allowance(address, /* owner */ address /* spender */ ) public pure override returns (uint256) {
         return 0;
     }
 
-    function approve(
-        address, /* spender */
-        uint256 /* amount */
-    ) public pure override returns (bool) {
+    function approve(address, /* spender */ uint256 /* amount */ ) public pure override returns (bool) {
         revert Disabled();
     }
 
@@ -120,32 +105,21 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
 
     // The following functions are overrides required by Solidity.
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Snapshot) {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20, ERC20Snapshot) {
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal override (ERC20, ERC20Votes) {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function _mint(address to, uint256 amount)
-        internal
-        override(ERC20, ERC20Votes)
-    {
+    function _mint(address to, uint256 amount) internal override (ERC20, ERC20Votes) {
         super._mint(to, amount);
     }
 
     function _burn(address account, uint256 amount)
         internal
-        override(ERC20, ERC20Votes)
+        override (ERC20, ERC20Votes)
         onlyRole(MINTER_BURNER_ROLE)
     {
         super._burn(account, amount);

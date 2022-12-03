@@ -22,18 +22,22 @@ contract Badges is ERC1155, Ownable {
     }
 
     function updateOwner(uint256 passportId, uint256[] memory tokenIds) public {
-        for (uint256 tokenIndex = 0; tokenIndex < tokenIds.length; tokenIndex++) {
-            address tokenOwner = passportToTokenToAddress[passportId][tokenIds[tokenIndex]];
-            if (tokenOwner == address(0)) {
-                // its the first time we see this passport for this token
-                passportToTokenToAddress[passportId][tokenIds[tokenIndex]] = passport.ownerOf(passportId);
-            } else if (tokenOwner != passport.ownerOf(passportId)) {
-                // the passport has moved
-                uint256 balance =
-                    balanceOf(passportToTokenToAddress[passportId][tokenIds[tokenIndex]], tokenIds[tokenIndex]);
-                _safeTransferFrom(tokenOwner, passport.ownerOf(passportId), tokenIds[tokenIndex], balance, "");
+        address passportOwner = passport.ownerOf(passportId); // reverts if does not exist
+        mapping(uint256 => address) storage passportAddressForToken = passportToTokenToAddress[passportId];
 
-                passportToTokenToAddress[passportId][tokenIds[tokenIndex]] = passport.ownerOf(passportId);
+        for (uint256 tokenIndex = 0; tokenIndex < tokenIds.length; tokenIndex++) {
+            uint256 currentTokenId = tokenIds[tokenIndex];
+            address currentTokenOwner = passportAddressForToken[currentTokenId];
+
+            if (currentTokenOwner == address(0)) {
+                // its the first time we see this passport for this token
+                passportAddressForToken[currentTokenId] = passportOwner;
+            } else if (currentTokenOwner != passportOwner) {
+                // the passport has moved
+                uint256 balance = balanceOf(passportAddressForToken[currentTokenId], currentTokenId);
+                _safeTransferFrom(currentTokenOwner, passportOwner, currentTokenId, balance, "");
+
+                passportAddressForToken[currentTokenId] = passportOwner;
             }
         }
     }
