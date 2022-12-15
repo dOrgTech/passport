@@ -2,6 +2,8 @@ _Warning: this is WIP. Do not use._
 
 ## Passport
 
+[![Passport overview](https://cdn.loom.com/sessions/thumbnails/1fdc5c939543498b969f9fafc9e0f530-with-play.gif)](https://www.loom.com/share/1fdc5c939543498b969f9fafc9e0f530 "Passport overview")
+
 A Passport NFT (ERC-721) is meant to represent membership in a DAO.
 This Passport can only be minted or transferred by the DAO.
 
