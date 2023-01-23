@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 import {ERC1155} from "../../lib/openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import {Ownable} from "../../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
@@ -93,11 +93,19 @@ contract Badges is ERC1155, Ownable {
         return balanceOfBatch(accounts, ids);
     }
 
-    function setApprovalForAll(address, /* operator */ bool /* approved */ ) public pure override {
+    function setApprovalForAll(
+        address,
+        /* operator */
+        bool /* approved */
+    ) public pure override {
         revert Disabled();
     }
 
-    function isApprovedForAll(address, /* account */ address operator) public view override returns (bool) {
+    function isApprovedForAll(
+        address,
+        /* account */
+        address operator
+    ) public view override returns (bool) {
         return address(this) == operator;
     }
 
