@@ -8,21 +8,21 @@ import {Passport} from "../Passport/Passport.sol";
 
 contract BadgesTest is Test {
     Badges public badges;
-    address public owner = address(0x1);
+    address constant owner = address(0x1);
 
-    Passport public passport;
-    address public passport_transferer = address(0x6);
+    Passport passport;
+    address constant passport_transferer = address(0x6);
 
-    address public alice = address(0x4);
-    address public bob = address(0x5);
+    address constant alice = address(0x4);
+    address constant bob = address(0x5);
 
-    uint256 alicePassportId = 0;
-    uint256 bobPassportID = 1;
+    uint256 constant alicePassportId = 0;
+    uint256 constant bobPassportID = 1;
 
-    uint256 badgeOne = 0;
+    uint256 constant badgeOne = 0;
 
     function setUp() public {
-        passport = new Passport("Passport", "PASS", "");
+        passport = new Passport(address(this), "Passport", "PASS", "");
         passport.grantRole(passport.TRANSFERER_ROLE(), passport_transferer);
 
         badges = new Badges(address(passport), "http/{id}");

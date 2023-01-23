@@ -7,25 +7,25 @@ import {Rep} from "./Rep.sol";
 import {Passport} from "../Passport/Passport.sol";
 
 contract RepTest is Test {
-    Rep public rep;
-    address public admin = address(0x1);
-    address public minter_burner = address(0x2);
-    address public snapshoter = address(0x3);
+    Rep rep;
+    address constant admin = address(0x1);
+    address constant minter_burner = address(0x2);
+    address constant snapshoter = address(0x3);
 
-    Passport public passport;
-    address public passport_transferer = address(0x6);
+    Passport passport;
+    address constant passport_transferer = address(0x6);
 
-    address public alice = address(0x4);
-    address public bob = address(0x5);
+    address constant alice = address(0x4);
+    address constant bob = address(0x5);
 
-    uint256 alicePassportId = 0;
-    uint256 bobPassportID = 1;
+    uint256 constant alicePassportId = 0;
+    uint256 constant bobPassportID = 1;
 
     function setUp() public {
-        passport = new Passport("Passport", "PASS", "");
+        passport = new Passport(address(this), "Passport", "PASS", "");
         passport.grantRole(passport.TRANSFERER_ROLE(), passport_transferer);
 
-        rep = new Rep(address(passport), "Reputation", "REP");
+        rep = new Rep(address(this), address(passport), "Reputation", "REP");
         rep.grantRole(rep.DEFAULT_ADMIN_ROLE(), admin);
         rep.grantRole(rep.MINTER_BURNER_ROLE(), minter_burner);
         rep.grantRole(rep.SNAPSHOT_ROLE(), snapshoter);
@@ -87,9 +87,7 @@ contract RepTest is Test {
 
     function testOnlyMinterBurnerCanMint() public {
         // cant mint with msg.sender
-        vm.expectRevert(
-            missingRoleError(rep.MINTER_BURNER_ROLE(), address(this))
-        );
+        vm.expectRevert(missingRoleError(rep.MINTER_BURNER_ROLE(), address(this)));
         rep.mint(alicePassportId, 100);
         assertEq(rep.balanceOf(alice), 0);
 
@@ -134,9 +132,7 @@ contract RepTest is Test {
         rep.mint(alicePassportId, 200);
 
         // the owner (msg.sender) can't burn
-        vm.expectRevert(
-            missingRoleError(rep.MINTER_BURNER_ROLE(), address(this))
-        );
+        vm.expectRevert(missingRoleError(rep.MINTER_BURNER_ROLE(), address(this)));
         rep.burnFrom(alicePassportId, 100);
         assertEq(rep.balanceOf(alice), 200);
 
@@ -186,19 +182,15 @@ contract RepTest is Test {
     }
 }
 
-function missingRoleError(bytes32 role, address account)
-    pure
-    returns (bytes memory)
-{
-    return
-        bytes(
-            string(
-                abi.encodePacked(
-                    "AccessControl: account ",
-                    Strings.toHexString(account),
-                    " is missing role ",
-                    Strings.toHexString(uint256(role), 32)
-                )
+function missingRoleError(bytes32 role, address account) pure returns (bytes memory) {
+    return bytes(
+        string(
+            abi.encodePacked(
+                "AccessControl: account ",
+                Strings.toHexString(account),
+                " is missing role ",
+                Strings.toHexString(uint256(role), 32)
             )
-        );
+        )
+    );
 }

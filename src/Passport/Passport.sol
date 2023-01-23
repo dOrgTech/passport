@@ -17,13 +17,13 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
     Counters.Counter private _tokenIdCounter;
     string private baseURI;
 
-    constructor(string memory name_, string memory symbol_, string memory baseURI_)
+    constructor(address owner, string memory name_, string memory symbol_, string memory baseURI_)
         ERC721(name_, symbol_)
         EIP712(name_, "1")
     {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(TRANSFERER_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(MINTER_ROLE, owner);
+        _grantRole(TRANSFERER_ROLE, owner);
         baseURI = baseURI_;
     }
 
@@ -42,11 +42,19 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
     }
 
     // Configure the approval functionality to return expected values
-    function approve(address, /* to */ uint256 /* tokenId */ ) public pure override {
+    function approve(
+        address,
+        /* to */
+        uint256 /* tokenId */
+    ) public pure override {
         revert Disabled();
     }
 
-    function setApprovalForAll(address, /* operator */ bool /* approved */ ) public pure override {
+    function setApprovalForAll(
+        address,
+        /* operator */
+        bool /* approved */
+    ) public pure override {
         revert Disabled();
     }
 
@@ -58,12 +66,11 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
 
     // Make sure the token is only transferable by the TRANSFERRER_ROLE
 
-    function isApprovedForAll(address, /* owner */ address operator /* operator */ )
-        public
-        view
-        override
-        returns (bool)
-    {
+    function isApprovedForAll(
+        address,
+        /* owner */
+        address operator /* operator */
+    ) public view override returns (bool) {
         return hasRole(TRANSFERER_ROLE, operator);
     }
 

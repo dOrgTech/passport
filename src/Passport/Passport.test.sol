@@ -6,16 +6,16 @@ import {Strings} from "../../lib/openzeppelin-contracts/contracts/utils/Strings.
 import {Passport} from "./Passport.sol";
 
 contract PassportTest is Test {
-    Passport public passport;
-    address public admin = address(0x1);
-    address public minter = address(0x2);
-    address public transferer = address(0x3);
+    Passport passport;
+    address constant admin = address(0x1);
+    address constant minter = address(0x2);
+    address constant transferer = address(0x3);
 
-    address public alice = address(0x4);
-    address public bob = address(0x5);
+    address constant alice = address(0x4);
+    address constant bob = address(0x5);
 
     function setUp() public {
-        passport = new Passport("Passport", "PASS", "");
+        passport = new Passport(address(this), "Passport", "PASS", "");
         passport.grantRole(passport.DEFAULT_ADMIN_ROLE(), admin);
         passport.grantRole(passport.MINTER_ROLE(), minter);
         passport.grantRole(passport.TRANSFERER_ROLE(), transferer);

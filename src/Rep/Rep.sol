@@ -22,14 +22,16 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
         _;
     }
 
-    constructor(address passport_, string memory name_, string memory symbol_)
+    constructor(address owner, address passport_, string memory name_, string memory symbol_)
         ERC20(name_, symbol_)
         ERC20Permit(name_)
     {
         passport = Passport(passport_);
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(SNAPSHOT_ROLE, msg.sender);
-        _grantRole(MINTER_BURNER_ROLE, msg.sender);
+        // check that the owner is an admin of the passport
+        require(passport.hasRole(passport.DEFAULT_ADMIN_ROLE(), owner), "Rep: initial owner must be passport admin");
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(SNAPSHOT_ROLE, owner);
+        _grantRole(MINTER_BURNER_ROLE, owner);
     }
 
     function updateOwner(uint256 passportId) public {
@@ -61,37 +63,53 @@ contract Rep is ERC20, ERC20Snapshot, AccessControl, ERC20Permit, ERC20Votes {
         return balanceOf(passport.ownerOf(passportId));
     }
 
-    function transfer(address, /* to */ uint256 /* amount */ ) public pure override returns (bool) {
+    function transfer(
+        address,
+        /* to */
+        uint256 /* amount */
+    ) public pure override returns (bool) {
         revert Disabled();
     }
 
-    function transferFrom(address, /* from */ address, /* to */ uint256 /* amount */ )
-        public
-        virtual
-        override
-        returns (bool)
-    {
+    function transferFrom(
+        address,
+        /* from */
+        address,
+        /* to */
+        uint256 /* amount */
+    ) public virtual override returns (bool) {
         revert Disabled();
     }
 
-    function increaseAllowance(address, /* spender */ uint256 /* addedValue */ ) public pure override returns (bool) {
+    function increaseAllowance(
+        address,
+        /* spender */
+        uint256 /* addedValue */
+    ) public pure override returns (bool) {
         revert Disabled();
     }
 
-    function decreaseAllowance(address, /* spender */ uint256 /* subtractedValue */ )
-        public
-        pure
-        override
-        returns (bool)
-    {
+    function decreaseAllowance(
+        address,
+        /* spender */
+        uint256 /* subtractedValue */
+    ) public pure override returns (bool) {
         revert Disabled();
     }
 
-    function allowance(address, /* owner */ address /* spender */ ) public pure override returns (uint256) {
+    function allowance(
+        address,
+        /* owner */
+        address /* spender */
+    ) public pure override returns (uint256) {
         return 0;
     }
 
-    function approve(address, /* spender */ uint256 /* amount */ ) public pure override returns (bool) {
+    function approve(
+        address,
+        /* spender */
+        uint256 /* amount */
+    ) public pure override returns (bool) {
         revert Disabled();
     }
 
