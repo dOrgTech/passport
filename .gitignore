@@ -12,3 +12,4 @@ out/
 
 #VSCode
 .vscode/
+crytic_export/
