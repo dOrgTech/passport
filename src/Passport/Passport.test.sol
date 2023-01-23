@@ -42,6 +42,15 @@ contract PassportTest is Test {
         assertEq(passport.balanceOf(msg.sender), 1);
     }
 
+    function testTotalSupply() public {
+        assertEq(passport.totalSupply(), 0);
+
+        // can mint with minter
+        vm.prank(minter);
+        passport.safeMint(msg.sender);
+        assertEq(passport.totalSupply(), 1);
+    }
+
     function testOnlyTransfererCanTransfer() public {
         // mint a Passport to alice
         vm.prank(minter);

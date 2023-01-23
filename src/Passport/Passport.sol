@@ -35,6 +35,10 @@ contract Passport is ERC721, AccessControl, EIP712, ERC721Votes {
         baseURI = newBaseURI;
     }
 
+    function totalSupply() public view returns (uint256) {
+        return _tokenIdCounter.current();
+    }
+
     function safeMint(address to) external onlyRole(MINTER_ROLE) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
