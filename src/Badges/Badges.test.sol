@@ -25,7 +25,7 @@ contract BadgesTest is Test {
         passport = new Passport(address(this), "Passport", "PASS", "");
         passport.grantRole(passport.TRANSFERER_ROLE(), passport_transferer);
 
-        badges = new Badges(address(passport), "http/{id}");
+        badges = new Badges(address(this), address(passport), "http/{id}");
 
         badges.transferOwnership(owner);
 

@@ -17,8 +17,11 @@ contract Badges is ERC1155, Ownable {
         _;
     }
 
-    constructor(address passport_, string memory uri_) ERC1155(uri_) {
+    constructor(address owner, address passport_, string memory uri_) ERC1155(uri_) {
         passport = Passport(passport_);
+        // check that the owner is an admin of the passport
+        require(passport.hasRole(passport.DEFAULT_ADMIN_ROLE(), owner), "Badges: initial owner must be passport admin");
+        transferOwnership(owner);
     }
 
     function updateOwner(uint256 passportId, uint256[] memory tokenIds) public {
