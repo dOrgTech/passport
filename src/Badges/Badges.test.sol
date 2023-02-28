@@ -147,8 +147,6 @@ contract BadgesTest is Test {
         assertEq(badges.balanceOf(newAlice, superBadge), 1);
         assertEq(badges.balanceOf(alicePassportId, superBadge), 1);
 
-        // TODO: test with BadgeOne
-
         // test implicit updateOwner
         vm.prank(passport_transferer);
         passport.safeTransferFrom(newAlice, alice, alicePassportId);
